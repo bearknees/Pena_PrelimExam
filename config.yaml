@@ -1,0 +1,69 @@
+---
+- hosts: all
+  become: true
+  vars:
+    uname: "bernice"
+
+  tasks:
+    - name: Install Python3 in Ubuntu
+      apt:
+        name: python3
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Python3 in CentOS
+      dnf:
+        name: python3
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: Install Pip3 in Ubuntu
+      apt:
+        name: python3-pip
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Pip3 in CentOS
+      dnf:
+        name: python3-pip
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: Install Java in Ubuntu
+      apt:
+        name: default-jre
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Java in CentOS
+      dnf:
+        name: java-11-openjdk-devel
+        state: latest
+      when: ansible_distribution == "CentOS"
+
+    - name: Set Aliases for Python3 and Pip3 (Ubuntu)
+      lineinfile:
+        path: ~/.bashrc
+        regexp: '^alias python='
+        line: 'alias python=/usr/bin/python3'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Set Aliases for Pip3 (Ubuntu)
+      lineinfile:
+        path: ~/.bashrc
+        regexp: '^alias pip='
+        line: 'alias pip=/home/{{ uname }}/.local/bin/pip3'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Set MOTD
+      lineinfile:
+        path: ~/.bashrc
+        regexp: '^# MOTD'
+        line: '# MOTD: Ansible Managed node by {{ uname }}'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Create User with Variable from config.yaml
+      ansible.builtin.user:
+        name: "{{ uname }}"
+        createhome: yes
+        home: "/home/{{ uname }}"
